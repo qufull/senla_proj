@@ -43,7 +43,7 @@ public class EcosystemManager {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
-                animals.add(new Animal(data[0], data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3])));
+                animals.add(new Animal(data[0], data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3]),Integer.parseInt(data[4])));
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -252,7 +252,8 @@ public class Ecosystem {
                 Herbivore.add("Корова");
                 Herbivore.add("Лошадь");
 
-                addAnimal(Herbivore.get( random.nextInt(Herbivore.size())), "Herbivore", random.nextInt(1,2), random.nextInt(1,8));
+                addAnimal(Herbivore.get( random.nextInt(Herbivore.size())), "Herbivore", random.nextInt(1,2), random.nextInt(8,10));
+                EcosystemManager.logEvent("Появилось новое травоядное животное");
                 break;
                 }
             case 5: {
@@ -260,7 +261,8 @@ public class Ecosystem {
                 Carnivore.add("Волк");
                 Carnivore.add("Медведь");
                 if(countAnimalsOfType("Herbivore") > 2) {
-                    addAnimal(Carnivore.get(random.nextInt(Carnivore.size())), "Carnivore", random.nextInt(1, 5), random.nextInt(15, 30));
+                    addAnimal(Carnivore.get(random.nextInt(Carnivore.size())), "Carnivore", random.nextInt(3, 5), random.nextInt(15, 20));
+                    EcosystemManager.logEvent("Появилось новое хищное животное");
                 }
                 break;
             }

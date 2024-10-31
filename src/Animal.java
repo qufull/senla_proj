@@ -13,6 +13,14 @@ public class Animal extends Organism{
         this.hungerThreshold = hungerThreshold;
     }
 
+    public Animal(String name, String foodType, int foodConsumption, int hungerThreshold,int hunger) {
+        super(name, "Animal");
+        this.food_consumption = foodConsumption;
+        this.foodType = foodType;
+        this.hunger = hunger;
+        this.hungerThreshold = hungerThreshold;
+    }
+
     public String getFoodType() {
         return foodType;
     }
@@ -29,9 +37,6 @@ public class Animal extends Organism{
         hunger += food_consumption;
     }
 
-    public boolean isDead() {
-        return hunger >= hungerThreshold;
-    }
 
     public int getHunger() {
         return hunger;
@@ -47,7 +52,7 @@ public class Animal extends Organism{
 
     @Override
     public String toString() {
-        return name + ","+ foodType + "," + food_consumption + "," + hungerThreshold;
+        return name + ","+ foodType  + "," + food_consumption + "," + hungerThreshold + "," + hunger;
     }
 
 }
