@@ -1,0 +1,5 @@
+Корова,Herbivore,1,9,7
+Заяц,Herbivore,1,8,5
+Лошадь,Herbivore,1,8,2
+Волк,Carnivore,3,30,27
+Овца,Herbivore,1,8,2
