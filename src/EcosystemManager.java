@@ -38,18 +38,31 @@ public class EcosystemManager {
     }
 
     public static List<Animal> loadAnimals(String filename) {
+
         List<Animal> animals = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
-                animals.add(new Animal(data[0], data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3]),Integer.parseInt(data[4])));
+
+                // Проверка количества элементов в массиве data
+                if (data.length < 5) {
+                    System.out.println("Ошибка: неполная запись в файле " + filename + ": " + line);
+                    continue; // Пропускаем эту строку, если данных недостаточно
+                }
+
+                try {
+                    animals.add(new Animal(data[0], data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3]), Integer.parseInt(data[4])));
+                } catch (NumberFormatException e) {
+                    System.out.println("Ошибка форматирования данных в строке: " + line);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return animals;
     }
+
     public static void saveResources(int water, int sunlight, String filename) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename,true))) {
             writer.write("Water:" + water);
@@ -108,6 +121,25 @@ public class EcosystemManager {
         }
     }
 
+    public static void createFile(String filename) {
+        File file = new File(filename);
+        try {
+            // Получаем родительскую директорию файла
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                // Создаем директорию, если она не существует
+                parentDir.mkdirs();
+            }
+
+            // Создаем файл, если он не существует
+            if (!file.exists()) {
+                file.createNewFile();
+            } else {
+            }
+        } catch (IOException e) {
+            System.out.println("Ошибка при создании файла: " + e.getMessage());
+        }
+    }
 
 
 

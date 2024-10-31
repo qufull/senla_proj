@@ -46,9 +46,6 @@ public class Animal extends Organism{
         return hungerThreshold;
     }
 
-    public int getFoodConsumption() {
-        return food_consumption;
-    }
 
     @Override
     public String toString() {

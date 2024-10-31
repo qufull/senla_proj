@@ -57,6 +57,11 @@ public class Main {
             }
         }
 
+        EcosystemManager.createFile(fileName + "/" + fileName + "_log.txt");
+        EcosystemManager.createFile(fileName + "/" + fileName + "_plants.txt");
+        EcosystemManager.createFile(fileName + "/" + fileName + "_animals.txt");
+        EcosystemManager.createFile(fileName + "/" + fileName + "_resources.txt");
+
         EcosystemManager.clearFile(fileName + "/" + fileName + "_log.txt");
         ecosystem.log(fileName);
 
@@ -117,6 +122,7 @@ public class Main {
             System.out.println("Файл с именем " + fileName + " не найден. Пожалуйста, проверьте имя файла.");
             return;
         }
+
 
         EcosystemManager.clearFile(fileName + "/" + fileName + "_log.txt");
         ecosystem.log(fileName);
@@ -182,10 +188,23 @@ public class Main {
     private static void addPlant() {
         System.out.print("Введите имя растения: ");
         String plantName = scanner.nextLine();
-        System.out.print("Введите скорость солнечного света (1-5): ");
-        int sunlightRate = scanner.nextInt();
-        System.out.print("Введите скорость воды (1-10): ");
-        int waterRate = scanner.nextInt();
+        int sunlightRate = -1;
+        while (sunlightRate < 1 || sunlightRate > 5) {
+            System.out.print("Введите скорость солнечного света (1-5): ");
+            sunlightRate = scanner.nextInt();
+            if (sunlightRate < 1 || sunlightRate > 5) {
+                System.out.println("Пожалуйста, введите число от 1 до 5.");
+            }
+        }
+
+        int waterRate = -1;
+        while (waterRate < 1 || waterRate > 10) {
+            System.out.print("Введите скорость воды (1-10): ");
+            waterRate = scanner.nextInt();
+            if (waterRate < 1 || waterRate > 10) {
+                System.out.println("Пожалуйста, введите число от 1 до 10.");
+            }
+        }
         scanner.nextLine(); // Очистка буфера
         ecosystem.addPlant(plantName, sunlightRate, waterRate);
     }
@@ -195,10 +214,24 @@ public class Main {
         String animalName = scanner.nextLine();
         System.out.print("Введите тип пищи (Herbivore/Carnivore): ");
         String foodType = scanner.nextLine();
-        System.out.print("Введите потребление пищи: ");
-        int foodConsumption = scanner.nextInt();
-        System.out.print("Введите порог голода: ");
-        int hungerThreshold = scanner.nextInt();
+
+        int foodConsumption = -1;
+        while (foodConsumption < 0) {
+            System.out.print("Введите потребление пищи: ");
+            foodConsumption = scanner.nextInt();
+            if (foodConsumption < 0) {
+                System.out.println("Пожалуйста, введите неотрицательное число.");
+            }
+        }
+
+        int hungerThreshold = -1;
+        while (hungerThreshold < 0) {
+            System.out.print("Введите порог голода: ");
+            hungerThreshold = scanner.nextInt();
+            if (hungerThreshold < 0) {
+                System.out.println("Пожалуйста, введите неотрицательное число.");
+            }
+        }
         scanner.nextLine(); // Очистка буфера
         ecosystem.addAnimal(animalName, foodType, foodConsumption, hungerThreshold);
     }
@@ -211,18 +244,30 @@ public class Main {
     }
 
     private static void setWater() {
-        System.out.print("Введите количество воды: ");
-        int water = scanner.nextInt();
-        scanner.nextLine(); // Очистка буфера
-        ecosystem.setResources(water, ecosystem.getSunlight()); // Устанавливаем только воду
+        int water = -1;
+        while (water < 0) {
+            System.out.print("Введите количество воды: ");
+            water = scanner.nextInt();
+            if (water < 0) {
+                System.out.println("Пожалуйста, введите неотрицательное число.");
+            }
+        }
+        scanner.nextLine();
+        ecosystem.setResources(water, ecosystem.getSunlight());
         System.out.println("Количество воды обновлено.");
     }
 
     private static void setSunlight() {
-        System.out.print("Введите количество солнечного света: ");
-        int sunlight = scanner.nextInt();
-        scanner.nextLine(); // Очистка буфера
-        ecosystem.setResources(ecosystem.getWater(), sunlight); // Устанавливаем только солнечный свет
+        int sunlight = -1;
+        while (sunlight < 0) {
+            System.out.print("Введите количество солнечного света: ");
+            sunlight = scanner.nextInt();
+            if (sunlight < 0) {
+                System.out.println("Пожалуйста, введите неотрицательное число.");
+            }
+        }
+        scanner.nextLine();
+        ecosystem.setResources(ecosystem.getWater(), sunlight);
         System.out.println("Количество солнечного света обновлено.");
     }
 

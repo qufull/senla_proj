@@ -61,6 +61,10 @@ public class Ecosystem {
             EcosystemManager.logEvent("Вода: " + water + ", Солнечный свет: " + sunlight);
             EcosystemManager.logEvent("Количество животных: " + animals.size() + ", Количество растений: " + plants.size());
 
+            EcosystemManager.logEvent(" ");
+            EcosystemManager.logEvent(predictPopulationChanges());
+            EcosystemManager.logEvent(" ");
+
             growPlants();
             animalsEat();
             reduceResources();
@@ -75,49 +79,49 @@ public class Ecosystem {
 
 
     private void reduceResources() {
-        water += 50;
-        sunlight += 20;
-        if (water < 0) water = 0;
-        if (sunlight < 0) sunlight = 0;
+        water -= 50;
+        sunlight -= 20;
+        water = Math.max(0, water);
+        sunlight = Math.max(0, sunlight);
     }
 
     private void growPlants() {
         if (water > 0 && sunlight > 0) {
             for (Plants plant : plants) {
-                water -= plant.getWaterRate(); // Растения потребляют воду
+                water -= plant.getWaterRate();
                 sunlight -= plant.getSunlightRate();
             }
-             // И солнечный свет
+
         }
     }
 
     private void animalsEat() {
-        List<Animal> toDelete = new ArrayList<>();  // Список для удаления животных
-            // Список для добавления новых животных (размножение)
+        List<Animal> toDelete = new ArrayList<>();
 
-        var iterator = animals.iterator();  // Итератор для обхода списка животных
+
+        var iterator = animals.iterator();
 
         while (iterator.hasNext()) {
             Animal animal = iterator.next();
 
-            // Если голод животного превышает порог в 2 раза, оно умирает
+
             if (animal.getHunger() >= animal.getHungerThreshold() * 1.5) {
                 toDelete.add(animal);
                 EcosystemManager.logEvent("Животное " + animal.getName() + " побигло.");
-                continue;  // Пропускаем дальнейшую обработку этого животного
+                continue;
             }
 
-            // Проверяем, голодает ли животное
+
             if (animal.getHunger() < animal.getHungerThreshold()) {
                 animal.starve();
             } else {
                 if (animal.getFoodType().equals("Herbivore")) {
                     if (!plants.isEmpty()) {
-                        Plants plant = plants.remove(0);  // Травоядное съедает растение
+                        Plants plant = plants.remove(0);
                         animal.eat();
                         EcosystemManager.logEvent("Животное " + animal.getName() + " съело " + plant.getName());
                     } else {
-                        animal.starve();  // Если нет еды, животное голодает
+                        animal.starve();
 
                     }
                 } else if (animal.getFoodType().equals("Carnivore")) {
@@ -141,6 +145,45 @@ public class Ecosystem {
 
     }
 
+
+    public String predictPopulationChanges() {
+        StringBuilder prediction = new StringBuilder("Прогноз изменения популяций:\n");
+
+        int availableWater = getWater();
+        int availableSunlight = getSunlight();
+        boolean sufficientPlants = !plants.isEmpty();
+
+        // Считаем количество травоядных и хищников
+        int herbivoreCount = countAnimalsOfType("Herbivore");
+        int carnivoreCount = countAnimalsOfType("Carnivore");
+
+        for (Animal animal : animals) {
+            String name = animal.getName();
+            String foodType = animal.getFoodType();
+
+            if (foodType.equals("Herbivore")) {
+                // Прогноз для травоядных на основе ресурсов
+                if (sufficientPlants && availableWater > 100 && availableSunlight > 50) {
+                    if (herbivoreCount < plants.size() * 2 && herbivoreCount >= 2) {
+                        prediction.append(name).append(": популяция вероятно будет расти\n");
+                    } else {
+                        prediction.append(name).append(": популяция вероятно останется стабильной\n");
+                    }
+                } else {
+                    prediction.append(name).append(": популяция вероятно сократится из-за недостатка ресурсов\n");
+                }
+            } else if (foodType.equals("Carnivore")) {
+                // Прогноз для хищников на основе количества травоядных
+                if (herbivoreCount >= 6 && carnivoreCount <= herbivoreCount / 2) {
+                    prediction.append(name).append(": популяция вероятно останется стабильной или немного вырастет\n");
+                } else {
+                    prediction.append(name).append(": популяция вероятно сократится\n");
+                }
+            }
+        }
+
+        return prediction.toString();
+    }
 
 
     private int countAnimalsOfName(String Name) {
@@ -175,36 +218,6 @@ public class Ecosystem {
         return null;
     }
 
-    public boolean hasSufficientFood(String foodType) {
-        int requiredAmount = foodType.equals("Herbivore") ? 1 : 6;
-
-        if (foodType.equals("Herbivore")) {
-
-            if (plants.size() >= requiredAmount) {
-                return true;
-            } else {
-
-                return false;
-            }
-        } else if (foodType.equals("Carnivore")) {
-
-            int herbivoreCount = 0;
-            for (Animal animal : animals) {
-                if (animal.getFoodType().equals("Herbivore")) {
-                    herbivoreCount++;
-                }
-            }
-            if (herbivoreCount >= requiredAmount) {
-                return true;
-            } else {
-
-                return false;
-            }
-        } else {
-            System.out.println("Неизвестный тип пищи: " + foodType);
-            return false;
-        }
-    }
 
     private void applyRandomEvents() {
         int event = random.nextInt(6);
@@ -229,14 +242,14 @@ public class Ecosystem {
 
 
                     if (animal.getFoodType().equals("Herbivore")) {
-                        if (countAnimalsOfName(animal.getName()) >= 2 && hasSufficientFood("Herbivore")) {
-                            Animal offspring = new Animal(animal.getName(), animal.getFoodType(), random.nextInt(20), animal.getHungerThreshold());
+                        if (countAnimalsOfName(animal.getName()) >= 2 && plants.size() == countAnimalsOfName("Herbivore")) {
+                            Animal offspring = new Animal(animal.getName(), animal.getFoodType(), random.nextInt(1,3), random.nextInt(15,20));
                             animals.add(offspring);
 
                         }
                     } else if (animal.getFoodType().equals("Carnivore")) {
-                        if (countAnimalsOfName(animal.getName()) >= 2 && hasSufficientFood("Carnivore")) {
-                            Animal offspring = new Animal(animal.getName(), animal.getFoodType(), random.nextInt(20,30), animal.getHungerThreshold());
+                        if (countAnimalsOfName(animal.getName()) >= 2  && countAnimalsOfType("Herbivore") >= 6) {
+                            Animal offspring = new Animal(animal.getName(), animal.getFoodType(), random.nextInt(3,5),random.nextInt(20,30) );
                             animals.add(offspring);
 
                         }
@@ -246,22 +259,15 @@ public class Ecosystem {
 
             }
             case 4:{
-                List<String> Herbivore = new ArrayList<>();
-                Herbivore.add("Заяц");
-                Herbivore.add("Овца");
-                Herbivore.add("Корова");
-                Herbivore.add("Лошадь");
-
-                addAnimal(Herbivore.get( random.nextInt(Herbivore.size())), "Herbivore", random.nextInt(1,2), random.nextInt(8,10));
+                List<String> herbivores = List.of("Заяц", "Овца", "Корова", "Лошадь");
+                addAnimal(herbivores.get( random.nextInt(herbivores.size())), "Herbivore", random.nextInt(1,2), random.nextInt(8,10));
                 EcosystemManager.logEvent("Появилось новое травоядное животное");
                 break;
                 }
             case 5: {
-                List<String> Carnivore = new ArrayList<>();
-                Carnivore.add("Волк");
-                Carnivore.add("Медведь");
-                if(countAnimalsOfType("Herbivore") > 2) {
-                    addAnimal(Carnivore.get(random.nextInt(Carnivore.size())), "Carnivore", random.nextInt(3, 5), random.nextInt(15, 20));
+                List<String> carnivores = List.of("Волк", "Медведь");
+                if(countAnimalsOfType("Herbivore") > 6) {
+                    addAnimal(carnivores.get(random.nextInt(carnivores.size())), "Carnivore", random.nextInt(3, 5), random.nextInt(15, 20));
                     EcosystemManager.logEvent("Появилось новое хищное животное");
                 }
                 break;
@@ -272,9 +278,6 @@ public class Ecosystem {
 
 
     public void saveState(String ecosystemFilename) {
-
-
-
         File ecosystemFolder = new File(ecosystemFilename);
         if (!ecosystemFolder.exists()) {
             ecosystemFolder.mkdir();
