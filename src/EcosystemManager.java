@@ -1,16 +1,23 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EcosystemManager {
+    private static final Logger logger = Logger.getLogger(EcosystemManager.class.getName());
     private static BufferedWriter logWriter;
 
+    static {
+        logger.setLevel(Level.WARNING); // Установите уровень логирования
+    }
+
     public static void savePlant(Plants plant, String filename) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename,true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write(plant.toString());
             writer.newLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при сохранении растения в файл: " + filename, e);
         }
     }
 
@@ -23,58 +30,54 @@ public class EcosystemManager {
                 plants.add(new Plants(data[0], Integer.parseInt(data[1]), Integer.parseInt(data[2])));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при загрузке растений из файла: " + filename, e);
         }
         return plants;
     }
 
     public static void saveAnimal(Animal animal, String filename) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename,true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write(animal.toString());
             writer.newLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при сохранении животного в файл: " + filename, e);
         }
     }
 
     public static List<Animal> loadAnimals(String filename) {
-
         List<Animal> animals = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
-
-                // Проверка количества элементов в массиве data
                 if (data.length < 5) {
-                    System.out.println("Ошибка: неполная запись в файле " + filename + ": " + line);
-                    continue; // Пропускаем эту строку, если данных недостаточно
+                    logger.warning("Ошибка: неполная запись в файле " + filename + ": " + line);
+                    continue;
                 }
-
                 try {
                     animals.add(new Animal(data[0], data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3]), Integer.parseInt(data[4])));
                 } catch (NumberFormatException e) {
-                    System.out.println("Ошибка форматирования данных в строке: " + line);
+                    logger.log(Level.WARNING, "Ошибка форматирования данных в строке: " + line, e);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при загрузке животных из файла: " + filename, e);
         }
         return animals;
     }
 
     public static void saveResources(int water, int sunlight, String filename) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename,true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write("Water:" + water);
             writer.newLine();
             writer.write("Sunlight:" + sunlight);
             writer.newLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при сохранении ресурсов в файл: " + filename, e);
         }
     }
 
-    public static int[] loadResources (String filename) {
+    public static int[] loadResources(String filename) {
         int[] resources = new int[2]; // 0: water, 1: sunlight
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -86,19 +89,19 @@ public class EcosystemManager {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Ошибка при загрузке ресурсов из файла: " + filename, e);
         }
         return resources;
     }
 
-    static public void clearFile(String filePath) {
+    public static void clearFile(String filePath) {
         File file = new File(filePath);
         try {
             if (file.exists()) {
                 new FileWriter(file, false).close(); // Открываем файл для записи и сразу закрываем, чтобы очистить его
             }
         } catch (IOException e) {
-            System.out.println("Ошибка при очистке файла: " + e.getMessage());
+            logger.log(Level.SEVERE, "Ошибка при очистке файла: " + e.getMessage(), e);
         }
     }
 
@@ -106,9 +109,10 @@ public class EcosystemManager {
         try {
             logWriter = new BufferedWriter(new FileWriter(filename, true));
         } catch (IOException e) {
-            System.out.println("Ошибка при инициализации лог-файла: " + e.getMessage());
+            logger.log(Level.SEVERE, "Ошибка при инициализации лог-файла: " + e.getMessage(), e);
         }
     }
+
     public static void logEvent(String message) {
         try {
             if (logWriter != null) {
@@ -117,31 +121,34 @@ public class EcosystemManager {
                 logWriter.flush();
             }
         } catch (IOException e) {
-            System.out.println("Ошибка при записи в лог-файл: " + e.getMessage());
+            logger.log(Level.SEVERE, "Ошибка при записи в лог-файл: " + e.getMessage(), e);
         }
     }
 
     public static void createFile(String filename) {
         File file = new File(filename);
         try {
-            // Получаем родительскую директорию файла
             File parentDir = file.getParentFile();
             if (parentDir != null && !parentDir.exists()) {
-                // Создаем директорию, если она не существует
-                parentDir.mkdirs();
+                boolean dirCreated = parentDir.mkdirs();
+                if (!dirCreated) {
+                    logger.warning("Не удалось создать директорию: " + parentDir.getAbsolutePath());
+                    return;
+                }
             }
 
-            // Создаем файл, если он не существует
             if (!file.exists()) {
-                file.createNewFile();
+                boolean fileCreated = file.createNewFile();
+                if (fileCreated) {
+                    logger.info("Файл создан: " + filename);
+                } else {
+                    logger.warning("Не удалось создать файл: " + filename);
+                }
             } else {
+                logger.info("Файл уже существует: " + filename);
             }
         } catch (IOException e) {
-            System.out.println("Ошибка при создании файла: " + e.getMessage());
+            logger.log(Level.SEVERE, "Ошибка при создании файла: " + e.getMessage(), e);
         }
     }
-
-
-
-
 }

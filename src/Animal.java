@@ -1,8 +1,8 @@
 public class Animal extends Organism{
     private int hunger;
-    private int hungerThreshold;
-    private int food_consumption;
-    private String foodType;
+    private final int hungerThreshold;
+    private final int food_consumption;
+    private final String foodType;
 
 
     public Animal(String name, String foodType, int foodConsumption, int hungerThreshold) {
